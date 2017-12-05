@@ -72,11 +72,16 @@ namespace GtaNativeParser
 
         private static NativeType GetNodeNativeType(HtmlNode item)
         {
-            if (item.GetAttributeValue("data-ns", "UNKNOWN") != "CFX") return NativeType.Client;
-
-            var node = item.Descendants("p").First(x => x.InnerText.StartsWith("CitizenFX API set: "));
-            var txt = node.InnerText.Replace("CitizenFX API set: ", "");
-            return txt == "Server" ? NativeType.Server : txt == "Client" ? NativeType.Client : NativeType.Shared;
+            try
+            {
+                var node = item.Descendants("p").First(x => x.InnerText.StartsWith("CitizenFX API set: "));
+                var txt = node.InnerText.Replace("CitizenFX API set: ", "");
+                return txt == "Server" ? NativeType.Server : txt == "Client" ? NativeType.Client : NativeType.Shared;
+            }
+            catch (InvalidOperationException)
+            {
+                return NativeType.Client;
+            }
         }
 
         private static string ReplaceCppTypes(this string input)

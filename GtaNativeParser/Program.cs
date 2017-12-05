@@ -43,11 +43,18 @@ namespace GtaNativeParser
             Console.WriteLine("With all of this parsed, we can start with the saving part!");
             Console.WriteLine("Processing the Client natives");
             new NativeWriter(CLIENT_SAVE_PATH, natives.Where(x => x.Type == NativeType.Client || x.Type == NativeType.Shared).ToArray()).Run();
+            Console.WriteLine();
             Console.WriteLine("Processing the Server natives");
             new NativeWriter(SERVER_SAVE_PATH, natives.Where(x => x.Type == NativeType.Server || x.Type == NativeType.Shared).ToArray()).Run();
-            Console.WriteLine("And it looks like we're done! This entire screen will close in about 5");
+            Console.WriteLine();
 
+#if DEBUG
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+#else
+            Console.WriteLine("And it looks like we're done! This entire screen will close in about 5");
             Thread.Sleep(5000);
+#endif
         }
     }
 }

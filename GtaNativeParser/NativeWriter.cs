@@ -57,6 +57,8 @@ namespace GtaNativeParser
                 });
 
                 // adding every native
+                foreach (var native in n)
+                    Console.WriteLine(CalculateNativeLine(native));
                 lines.AddRange(n.Select(CalculateNativeLine));
 
                 // adding namespace end
