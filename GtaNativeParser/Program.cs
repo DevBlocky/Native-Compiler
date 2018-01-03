@@ -9,7 +9,9 @@ namespace GtaNativeParser
     {
         internal const string REF_NATIVE_WEB = "https://runtime.fivem.net/doc/reference.html";
         internal const string CLIENT_SAVE_PATH = "ClientNatives.cs";
+        internal const string CLIENT_MIN_SAVE_PATH = "ClientNatives.min.cs";
         internal const string SERVER_SAVE_PATH = "ServerNatives.cs";
+        internal const string SERVER_MIN_SAVE_PATH = "ServerNatives.min.cs";
 
         private static HtmlDocument doc;
         private static readonly HtmlWeb web = new HtmlWeb();
@@ -43,9 +45,11 @@ namespace GtaNativeParser
             Console.WriteLine("With all of this parsed, we can start with the saving part!");
             Console.WriteLine("Processing the Client natives");
             new NativeWriter(CLIENT_SAVE_PATH, natives.Where(x => x.Type == NativeType.Client || x.Type == NativeType.Shared).ToArray()).Run();
+            new NativeWriter(CLIENT_MIN_SAVE_PATH, natives.Where(x => x.Type == NativeType.Client || x.Type == NativeType.Shared).ToArray()).RunMin();
             Console.WriteLine();
             Console.WriteLine("Processing the Server natives");
             new NativeWriter(SERVER_SAVE_PATH, natives.Where(x => x.Type == NativeType.Server || x.Type == NativeType.Shared).ToArray()).Run();
+            new NativeWriter(SERVER_MIN_SAVE_PATH, natives.Where(x => x.Type == NativeType.Server || x.Type == NativeType.Shared).ToArray()).RunMin();
             Console.WriteLine();
 
 #if DEBUG

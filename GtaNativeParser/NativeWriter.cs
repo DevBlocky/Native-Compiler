@@ -25,7 +25,6 @@ namespace GtaNativeParser
 
             List<string> lines = new List<string>();
 
-            Console.WriteLine("Writing initial lines");
             // starting lines
             lines.AddRange(new[]
             {
@@ -44,7 +43,6 @@ namespace GtaNativeParser
                 "{",
             });
 
-            Console.WriteLine("Writing all of the natives");
             // native lines
             foreach (var item in namespaces)
             {
@@ -55,10 +53,8 @@ namespace GtaNativeParser
                     $"public static class {item}",
                     "{"
                 });
-
+                
                 // adding every native
-                foreach (var native in n)
-                    Console.WriteLine(CalculateNativeLine(native));
                 lines.AddRange(n.Select(CalculateNativeLine));
 
                 // adding namespace end
@@ -68,25 +64,57 @@ namespace GtaNativeParser
                 });
             }
 
-            Console.WriteLine("Ending the write");
             // ending lines
             lines.AddRange(new[]
             {
                 "}"
             });
 
-            Console.WriteLine("Sending all of the lines to the file!");
             File.WriteAllLines(path, LineIndentation(lines.ToArray()));
+        }
+        public void RunMin()
+        {
+            var namespaces = GetExistingNamespaces().ToArray();
+
+            List<string> lines = new List<string>();
+
+            // last line of the min versions
+            string lastLn = $"using CitizenFX.Core;using CitizenFX.Core.Native;namespace {MASTER_NAMESPACE}{{";
+
+            // starting lines
+            lines.AddRange(new[]
+            {
+                "/*",
+                "  File compiled by Native Compiler",
+                "  Native Compiler by BlockBa5her ;)",
+                "*/",
+            });
+            // native lines
+            foreach (var item in namespaces)
+            {
+                Native[] n = natives.Where(x => x.Namespace == item).ToArray();
+                // adding namespace start
+                lastLn += $"public static class {item}{{";
+
+                // adding every native
+                lastLn += n.Select(CalculateNativeLineMin).Aggregate((x, y) => x + y);
+
+                // adding namespace end
+                lastLn += "}";
+            }
+            lastLn += "}";
+            lines.Add(lastLn);
+            File.WriteAllLines(path, lines.ToArray());
         }
 
         public static string CalculateNativeLine(Native native)
         {
             string paramTxt1 = "";
             string paramTxt2 = "";
-            string typeref = native.Return == "void" ? "" : $"<{native.Return}>";
+            string type = native.Return == "void" ? "" : $"<{native.Return}>";
             if (!native.Parameters.Any())
                 return
-                    $"{NATIVE_PREFIX} {native.Return} {native.Name}({paramTxt1}) => Function.Call{typeref}((Hash){"0x" + native.Hash.ToString("X")}{paramTxt2});";
+                    $"{NATIVE_PREFIX} {native.Return} {native.Name}({paramTxt1}) => Function.Call{type}((Hash){"0x" + native.Hash.ToString("X")}{paramTxt2});";
 
             for (int i = 0; i < native.Parameters.Length; i++)
             {
@@ -96,7 +124,27 @@ namespace GtaNativeParser
                 paramTxt2 += $", {param.Name}";
             }
             return
-                $"{NATIVE_PREFIX} {native.Return} {native.Name}({paramTxt1}) => Function.Call{typeref}((Hash){"0x" + native.Hash.ToString("X")}{paramTxt2});";
+                $"{NATIVE_PREFIX} {native.Return} {native.Name}({paramTxt1}) => Function.Call{type}((Hash){"0x" + native.Hash.ToString("X")}{paramTxt2});";
+        }
+
+        public static string CalculateNativeLineMin(Native native)
+        {
+            string paramTxt1 = "";
+            string paramTxt2 = "";
+            string type = native.Return == "void" ? "" : $"<{native.Return}>";
+            if (!native.Parameters.Any())
+                return
+                    $"{NATIVE_PREFIX} {native.Return} {native.Name}({paramTxt1})=>Function.Call{type}((Hash){"0x" + native.Hash.ToString("X")}{paramTxt2});";
+
+            for (int i = 0; i < native.Parameters.Length; i++)
+            {
+                Parameter param = native.Parameters[i];
+                paramTxt1 += i == 0 ? $"{param.Type} {param.Name}" : $",{param.Type} {param.Name}";
+
+                paramTxt2 += $",{param.Name}";
+            }
+            return
+                $"{NATIVE_PREFIX} {native.Return} {native.Name}({paramTxt1})=>Function.Call{type}((Hash){"0x" + native.Hash.ToString("X")}{paramTxt2});";
         }
 
         public IEnumerable<string> GetExistingNamespaces()
